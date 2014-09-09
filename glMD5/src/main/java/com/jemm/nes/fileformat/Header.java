@@ -41,6 +41,8 @@ public class Header {
 	private byte flags10;
 	private byte[] zeroFilled = new byte[5];
 	
+	private Mirroring mirroring;
+	
 	Header(){}
 	
     public static Header createFromBytes(ByteBuffer buf) throws IOException {
@@ -58,6 +60,16 @@ public class Header {
         header.flags9 = buf.get();
         header.flags10 = buf.get();
         buf.get(header.zeroFilled, 0, 5);
+        
+        if((header.flags6&0x08)!=0) {
+        	header.mirroring = Mirroring.FourScreen;
+        } else {
+        	if((header.flags6&0x01)!=0) {
+        		header.mirroring = Mirroring.Horizontal;
+        	} else {
+        		header.mirroring = Mirroring.Vertical;
+        	}
+        }
         
         // ...extract other fields here
 
@@ -78,5 +90,9 @@ public class Header {
     //512-byte trainer at $7000-$71FF.
     public boolean isTrainerPresent() {
     	return ((flags6 & 0x04) != 0);
+    }
+    
+    public Mirroring getMirroring() {
+    	return mirroring;
     }
 }

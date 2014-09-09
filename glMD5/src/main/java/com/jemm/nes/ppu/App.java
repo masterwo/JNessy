@@ -1,4 +1,4 @@
-package com.jemm.glMD5;
+package com.jemm.nes.ppu;
 
 import java.awt.*;
 import java.awt.event.*;
