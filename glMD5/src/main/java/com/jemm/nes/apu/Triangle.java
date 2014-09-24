@@ -12,7 +12,11 @@ public class Triangle {
     private byte[] buffer;
     private int offset = 0;
     
+    public static boolean linearCounterReloadFlag = false;
+    public byte linearCounter = 0;
+    
     private SourceDataLine sdl;
+	public static int lengthCounter;
     
     public Triangle() {
     }

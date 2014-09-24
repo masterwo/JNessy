@@ -58,11 +58,7 @@ public class NesMain {
 				ppuCycle = 0;
 				cpuCycle++;
 			}
-			
-			if(cpuCycle == 2) {
-				//apu.update();
-				cpuCycle = 0;
-			}
+			apu.update();
 		}
 	}
 }

@@ -4,6 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import com.jemm.nes.apu.ApuRegisters;
+import com.jemm.nes.apu.Square1;
+import com.jemm.nes.apu.Square2;
+import com.jemm.nes.apu.Triangle;
 import com.jemm.nes.peripherals.JoyPad;
 import com.jemm.nes.ppu.PpuMem;
 import com.jemm.nes.ppu.PpuRegisters;
@@ -122,6 +125,8 @@ public class Memory {
 			CPU_ROM.put(memIndex-0x8000, (byte)data);//Offset to start from 0.
 		} else if(memIndex >= 0x6000) {
 			System.out.print(data);
+		} else if(memIndex == 0x4017) {
+			apuRegisters.FRAME_COUNTER = (byte) data;
 		} else if(memIndex >= 0x4016) {
 			joyPad.set(data);
 		} else if(memIndex == 0x4014) { //SPECIAL CASE OAM
@@ -140,6 +145,8 @@ public class Memory {
 					break;
 				case 0x03:
 					apuRegisters.SQ1_HI = (byte) data;
+					Square1.lengthCounter = apuRegisters.LENGTH_COUNTER_TABLE[apuRegisters.SQ1_HI >>> 3];
+					Square1.startFlag = true;
 					break;
 				case 0x04:
 					apuRegisters.SQ2_ENV = (byte) data;
@@ -152,6 +159,7 @@ public class Memory {
 					break;
 				case 0x07:
 					apuRegisters.SQ2_HI = (byte) data;
+					Square2.lengthCounter = apuRegisters.LENGTH_COUNTER_TABLE[apuRegisters.SQ2_HI >>> 3];
 					break;
 				case 0x08:
 					apuRegisters.TRI_CTRL = (byte) data;
@@ -161,6 +169,8 @@ public class Memory {
 					break;
 				case 0x0B:
 					apuRegisters.TRI_HI = (byte) data;
+					Triangle.linearCounterReloadFlag = true;
+					Triangle.lengthCounter = apuRegisters.LENGTH_COUNTER_TABLE[apuRegisters.TRI_HI >>> 3];
 					break;
 				case 0x0C:
 					//Noise generator.
@@ -168,11 +178,14 @@ public class Memory {
 				case 0x11:
 					//apuRegisters.TRI_HI = (byte) data;//TODO DMC
 					break;
+				case 0x14:
+					break;
 				case 0x15:
 					apuRegisters.APUFLAGS = (byte) data;
 					break;
 				default:
-					//System.out.println("Unsupported Sound memory operation.");
+//					byte r = (byte)(memIndex & 0xFF);
+//					System.out.println("Unsupported Sound memory operation.");
 					break;
 			}
 		} else if(memIndex >= 0x2000) {
