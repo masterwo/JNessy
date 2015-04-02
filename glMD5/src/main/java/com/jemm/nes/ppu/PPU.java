@@ -174,11 +174,12 @@ public class PPU implements GLEventListener {
 		if((registers.PPUMASK&0x10)!=0){ //Sprites enabled.
 			for(int i = 0; i < 64; i++) {
 				short yPos = (short) (PpuMem.getInstance().OAM_DATA.get(i*4) & 0xFF);
-				short tileSelect = (short) (PpuMem.getInstance().OAM_DATA.get(i*4+1) & 0xFF);
+				//short tileSelect = (short) (PpuMem.getInstance().OAM_DATA.get(i*4+1) & 0xFF);
+				short tileSelect =(short) (PpuRegisters.getInstance().PPUCTRL & 0x08);
 				short sprtCtrl = (short) (PpuMem.getInstance().OAM_DATA.get(i*4+2) & 0xFF);
 				//if((sprtCtrl&0x20) == 0) { //Drawn infront of background.
 					short xPos = (short) (PpuMem.getInstance().OAM_DATA.get(i*4+3) & 0xFF);
-					if((tileSelect&0x01)==0) {
+					if(tileSelect == 0) {
 						tileMap = chrLeft;
 					} else {
 						tileMap = chrRight;
@@ -267,8 +268,8 @@ public class PPU implements GLEventListener {
 		
 		createTexture();
 		
-		reWindowChrRight = new ResourceWindow(chrRight);
-		reWindowChrLeft = new ResourceWindow(chrLeft);
+		reWindowChrRight = new ResourceWindow(chrRight, "Background");
+		reWindowChrLeft = new ResourceWindow(chrLeft, "Sprite");
 		
 		for(int i = 0; i < 30; i++) {
 			for(int j = 0; j < 32; j++) {

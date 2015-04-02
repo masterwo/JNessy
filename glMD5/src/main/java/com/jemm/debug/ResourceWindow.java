@@ -25,10 +25,10 @@ public class ResourceWindow implements GLEventListener {
 	BufferedImage resource;
 	IntBuffer texture = IntBuffer.allocate(1);
 
-	public ResourceWindow(BufferedImage resource) {
+	public ResourceWindow(BufferedImage resource, String name) {
 		this.resource = resource;
 		
-		JFrame frame = new JFrame("Resource");
+		JFrame frame = new JFrame(name);
 		frame.setSize(300, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GLCanvas canvas = new GLCanvas();
