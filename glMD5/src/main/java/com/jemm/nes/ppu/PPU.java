@@ -27,7 +27,7 @@ public class PPU implements GLEventListener {
 	PpuRegisters registers = PpuRegisters.getInstance();
 
 	public PPU() {
-		JFrame frame = new JFrame("2D Graphics");
+		JFrame frame = new JFrame("Nes Emu");
 		frame.setSize(300, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GLCanvas canvas = new GLCanvas();
@@ -64,15 +64,16 @@ public class PPU implements GLEventListener {
 
 		for (int i = 7; i >= 0; i--) {
 			int value = (((hi >> i) << 1) & 0x02) + (((lo >> i)) & 0x01);
-			if (value == 0x00) {
-				returnValues[7 - i] = 0x00;
-			} else if (value == 0x01) {
-				returnValues[7 - i] = 0xFF;
-			} else if (value == 0x02) {
-				returnValues[7 - i] = 0xFF00;
-			} else {
-				returnValues[7 - i] = 0xFF0000;
-			}
+			returnValues[7 - i] = value;
+//			if (value == 0x00) {
+//				returnValues[7 - i] = 0x00;
+//			} else if (value == 0x01) {
+//				returnValues[7 - i] = 0xFF;
+//			} else if (value == 0x02) {
+//				returnValues[7 - i] = 0xFF00;
+//			} else {
+//				returnValues[7 - i] = 0xFF0000;
+//			}
 		}
 		return returnValues;
 	}
@@ -129,6 +130,7 @@ public class PPU implements GLEventListener {
 	}
 	
 	int nameTableEntry;
+	int attributeTableEntry;
 
 	@Override
 	public void display(GLAutoDrawable drawable) {
@@ -145,6 +147,10 @@ public class PPU implements GLEventListener {
 			for(int i = 0; i < 30; i++) {
 				for(int j = 0; j < 32; j++) {
 					nameTableEntry = (memory.get(0x2000 + (i+registers.pPUScrollY)*32 + j + registers.pPUScrollX) & 0xFF);//Unsign
+					
+					int attrOffset = (i*30)+j; 
+					
+					attributeTableEntry = (memory.get(0x2000 + (i+registers.pPUScrollY)*32 + j + registers.pPUScrollX) & 0xFF);
 					
 					int yCoord = nameTableEntry/16;
 					int xCoord = nameTableEntry%16;
@@ -168,36 +174,47 @@ public class PPU implements GLEventListener {
 				}
 			}
 		} else {
-			
 			//256, 240,
 		}
 		if((registers.PPUMASK&0x10)!=0){ //Sprites enabled.
+			ByteBuffer OAM_DATA = PpuMem.getInstance().OAM_DATA.duplicate();
+			OAM_DATA.rewind();
 			for(int i = 0; i < 64; i++) {
-				short yPos = (short) (PpuMem.getInstance().OAM_DATA.get(i*4) & 0xFF);
-				//short tileSelect = (short) (PpuMem.getInstance().OAM_DATA.get(i*4+1) & 0xFF);
-				short tileSelect =(short) (PpuRegisters.getInstance().PPUCTRL & 0x08);
-				short sprtCtrl = (short) (PpuMem.getInstance().OAM_DATA.get(i*4+2) & 0xFF);
-				//if((sprtCtrl&0x20) == 0) { //Drawn infront of background.
-					short xPos = (short) (PpuMem.getInstance().OAM_DATA.get(i*4+3) & 0xFF);
-					if(tileSelect == 0) {
-						tileMap = chrLeft;
-					} else {
-						tileMap = chrRight;
-					}
-					int xCoord = (tileSelect&0xFE)%16;
-					int yCoord = (tileSelect&0xFE)/16;
-					
-					for(int dy = 0; dy < 8; dy++) {
-						for(int dx = 0; dx < 8; dx++) {
-							try {
-								background.setRGB(xPos+dx, yPos+1+dy, tileMap.getRGB(xCoord*8+dx, yCoord*8+dy));
-							} catch(Exception ex) {
-								//System.out.println("xCoord*8+dx: " + xCoord*8+dx);
-								//System.out.println("yCoord*8+dy: " + yCoord*8+dy);
+				short yPos = (short) (OAM_DATA.get() & 0xFF);
+				short tileSelect = (short) (OAM_DATA.get() & 0xFF);
+				//short tileSelect =(short) (PpuRegisters.getInstance().PPUCTRL & 0x10);
+				short sprtCtrl = (short) (OAM_DATA.get() & 0xFF);
+//				if((sprtCtrl&0x20) == 0) { //Drawn infront of background.
+				short xPos = (short) (OAM_DATA.get() & 0xFF);
+				if((PpuRegisters.getInstance().PPUCTRL & 0x08) == 0) {
+					tileMap = chrLeft;
+				} else {
+					tileMap = chrRight;
+				}
+				int xCoord = tileSelect%16;
+				int yCoord = tileSelect/16;
+				
+				for(int dy = 0; dy < 8; dy++) {
+					for(int dx = 0; dx < 8; dx++) {
+						try {
+							if((sprtCtrl & 0x40) == 0) {
+								int rgb = tileMap.getRGB(xCoord*8+dx, yCoord*8+dy);
+								if((rgb & 0xFFFFFF) != 0) {
+									background.setRGB(xPos+dx, yPos+1+dy, rgb);
+								}
+							} else {
+								int rgb = tileMap.getRGB(xCoord*8+(7-dx), yCoord*8+dy);
+								if((rgb & 0xFFFFFF) != 0) {
+									background.setRGB(xPos+dx, yPos+1+dy, rgb);
+								}
 							}
+						} catch(Exception ex) {
+							//System.out.println("xCoord*8+dx: " + xCoord*8+dx);
+							//System.out.println("yCoord*8+dy: " + yCoord*8+dy);
 						}
 					}
-				//}
+				}
+//				}
 			}
 		}
 

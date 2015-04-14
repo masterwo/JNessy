@@ -3,7 +3,7 @@ package com.jemm.nes.cpu;
 public class CpuRegisters {
 	private static final CpuRegisters instance = new CpuRegisters();
 
-	public int  PC;	//program counter				(16 bit)
+	public int  PC;	    //program counter				(16 bit)
 	public short AC;	//accumulator					(8 bit)
 	public short X;		//X register					(8 bit)
 	public short Y;		//Y register					(8 bit)

@@ -1450,7 +1450,7 @@ public class Instructions6502 {
 					dAddr = memory.cmGetShort((idAddr) & 0xFF);
 				}
 				short indirectY = memory.cmGet((dAddr + (registers.Y & 0xFF)) & 0xFFFF);
-				registers.AC = (byte)indirectY;
+				registers.AC = indirectY;
 				break;
 			}
 			
@@ -2174,7 +2174,8 @@ public class Instructions6502 {
 				//(Indirect),y
 				idAddr = memory.cmGet();//Remove signedness
 				dAddr = (short) memory.cmGetShort(idAddr);
-				memory.cmPut(dAddr + (registers.Y & 0xFF), registers.AC);
+				dAddr = dAddr + (registers.Y & 0xFF);
+				memory.cmPut(dAddr, registers.AC);
 				break;
 			}
 		}

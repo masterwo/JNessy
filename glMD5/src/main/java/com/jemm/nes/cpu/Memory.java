@@ -131,7 +131,7 @@ public class Memory {
 			joyPad.set(data);
 		} else if(memIndex == 0x4014) { //SPECIAL CASE OAM
 			PpuMem.getInstance().OAM_DATA.clear();
-			PpuMem.getInstance().OAM_DATA.put(internalRam.array(), 0x0100*data, 256);
+			PpuMem.getInstance().OAM_DATA.put(internalRam.array(), 0x0100*(data), 256);
 		} else if(memIndex >= 0x4000) {
 			switch((byte)(memIndex & 0xFF)) {
 				case 0x00:
